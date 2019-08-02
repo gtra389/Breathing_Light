@@ -1,20 +1,45 @@
+#
 # Development board: D1 mini 
-# Development environment: Micropython
+# Development environment: MicroPython
+#
+# Available device: PIR sensor
+# Manufacturer:
+# Product number: DYP-ME003
+# Serial communication protocol: AI/AO
+# Purpose:
+# To use a PIR motion sensor detect movement. 
+# When motion is detected, the breathing LED  is turned on. 
+#
 
+# -------------------#
 # Including
+# -------------------#
 from machine import Pin, Timer, PWM
 import time
 
+# -------------------#
 # Initialization
+# -------------------#
 BrePin = Pin(13, Pin.OUT)
 BrePin.value(0)
-BreLED = PWM(BrePin, 1000)
-LED = Pin(2, Pin.OUT)
-PIR = Pin(5, Pin.IN)
-LED.value(1)
-BreLED.duty(0)
 
+# Create the PWM object
+# the frequency must be between 1Hz and 1kHz
+BreLED = PWM(BrePin, 1000)
+
+# Declare PIR (Pyro-electric Infrared Detector) sensor as input
+PIR = Pin(5, Pin.IN)
+
+LED = Pin(2, Pin.OUT)
+LED.value(1) # Trun off LED light
+
+# the duty cycle is between 0 (all off) and 1023 (all on) 
+# Use the built-in 10-bits ADC # 2^10 = 1024
+BreLED.duty(0)  
+
+# -------------------#
 # Definition of variable
+# -------------------#
 step   = 32
 _duty  = 0
 ms     = round(3000 / step) # Unit in microsecond
@@ -23,7 +48,8 @@ start_timer = True
 delay_ms = 6 * 1000
 ii = 0
 
-
+# Define a function of breathing LED 
+# accomplish this effect with pulse width modulation (PWM)
 def breath(t):
   global step, _duty
   _duty += step
@@ -36,6 +62,10 @@ def breath(t):
     step *= -1
   BreLED.duty(_duty)
 
+
+# -------------------#
+# Main
+# -------------------#
 try:
   while True:
     if PIR.value() == 1:      
